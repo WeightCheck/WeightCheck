@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Huhtamaki Weight Calculator</title>
+
+<style>
+body {
+    margin: 0;
+    background: #121212;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 420px;
+    margin: 20px auto;
+    background: #1E1E1E;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.logo {
+    background: #003A8F;
+    padding: 10px;
+    text-align: center;
+}
+
+.title {
+    background: #005EB8;
+    padding: 10px;
+    text-align: center;
+    margin-top: 6px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    margin-top: 6px;
+    border-radius: 6px;
+    border: 1px solid #444;
+}
+
+.search {
+    background: #2A2A2A;
+    color: white;
+}
+
+.product-list {
+    max-height: 160px;
+    overflow-y: auto;
+    border: 1px solid #444;
+    margin-top: 6px;
+    border-radius: 6px;
+}
+
+.group {
+    color: #4DA3FF;
+    padding: 6px;
+    font-weight: bold;
+}
+
+.product {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.product:hover {
+    background: #2A2A2A;
+}
+
+button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    background: #003A8F;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #005EB8;
+}
+
+.result {
+    margin-top: 12px;
+}
+
+.green {
+    color: lightgreen;
+    font-weight: bold;
+}
+
+.red {
+    color: red;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="logo">
+        <svg width="140" height="28" viewBox="0 0 300 60">
+            <text x="0" y="42"
+                  font-family="Arial"
+                  font-size="34"
+                  font-weight="600"
+                  fill="#ffffff">
+                Huhta
+            </text>
+            <text x="95" y="42"
+                  font-family="Arial"
+                  font-size="34"
+                  font-weight="600"
+                  fill="#4DA3FF">
+                maki
+            </text>
+        </svg>
+    </div>
+
+    <div class="title">
+        Weight Calculator
+    </div>
+
+    <input class="search"
+           id="search"
+           placeholder="Search product...">
+
+    <div class="product-list" id="productList"></div>
+
+    <div style="margin-top:6px">
+        Selected: <b id="selectedProduct">-</b>
+    </div>
+
+    <input id="wetWeight" placeholder="Wet weight (g)">
+    <input id="dryWeight" placeholder="Dry weight (g)">
+    <input id="boneDry" placeholder="Bone dry (g)">
+    <input id="dryerTemp" placeholder="Dryer temp (°C)">
+    <input id="speed" placeholder="Speed (KO)">
+
+    <button onclick="calculate()">Calculate</button>
+
+    <div id="result" class="result"></div>
+
+</div>
+
+<script>
+
+const productGroups = {
+    "Egg carton": {
+        "Effect 6": 48.9,
+        "Effect 10": 40.4,
+        "Nestpack 12": 47.8,
+        "Effect 12 (V?)": 48.5,
+        "Effect 15": 58.5,
+        "Smilepack 18": 68.6,
+        "Indytop 18": 74,
+        "Effect 18": 69.6
+    },
+    "Egg carton flapless": {
+        "Smart 6": 47.4,
+        "Smart 10": 38.8,
+        "Smart 12": 46.1
+    },
+    "Egg carton Jumbo": {
+        "Effect 6 Jumbo": 55.9,
+        "Effect 10 Jumbo": 45.6
+    },
+    "Cup carrier": {
+        "2CC tooling": 25.9,
+        "Frisby pocket": 28.8,
+        "Jumbo cup carrier": 34.0
+    },
+    "Tray": {
+        "XL-tray": 80.0,
+        "17 LBS Tray": 66.0
+    },
+    "Bottle divider": {
+        "Bottle divider": 77.1
+    }
+};
+
+const tolerancePerGroup = {
+    "Tray": 2,
+    "Bottle divider": 2
+};
+
+let selectedProduct = "";
+
+function getProductInfo() {
+
+    for (const [groupName, group] of Object.entries(productGroups)) {
+
+        if (selectedProduct in group) {
+
+            return {
+                target: group[selectedProduct],
+                tolerance: tolerancePerGroup[groupName] || 1
+            };
+        }
+    }
+
+    return {
+        target: 0,
+        tolerance: 1
+    };
+}
+
+function renderProducts(searchText = "") {
+
+    const productList = document.getElementById("productList");
+    productList.innerHTML = "";
+
+    Object.entries(productGroups).forEach(([group, items]) => {
+
+        const filtered = Object.keys(items).filter(p =>
+            p.toLowerCase().includes(searchText.toLowerCase())
+        );
+
+        if (!filtered.length) return;
+
+        const groupDiv = document.createElement("div");
+        groupDiv.className = "group";
+        groupDiv.textContent = group;
+        productList.appendChild(groupDiv);
+
+        filtered.forEach(product => {
+
+            const productDiv = document.createElement("div");
+            productDiv.className = "product";
+            productDiv.textContent = product;
+
+            productDiv.onclick = () => {
+                selectedProduct = product;
+                document.getElementById("selectedProduct").textContent = product;
+            };
+
+            productList.appendChild(productDiv);
+        });
+    });
+}
+
+document.getElementById("search")
+.addEventListener("input", e => {
+    renderProducts(e.target.value);
+});
+
+renderProducts();
+
+function calculate() {
+
+    const wet = parseFloat(document.getElementById("wetWeight").value) || 0;
+    const dry = parseFloat(document.getElementById("dryWeight").value) || 0;
+    const bone = parseFloat(document.getElementById("boneDry").value) || 0;
+
+    const dryerTemp = document.getElementById("dryerTemp").value;
+    const speed = document.getElementById("speed").value;
+
+    if (wet === 0 || dry === 0) {
+        return;
+    }
+
+    const machineDryness = (bone / wet) * 100;
+    const moistureContent = ((dry - bone) / dry) * 100;
+
+    const info = getProductInfo();
+
+    const wetShouldBe =
+        info.target / (machineDryness / 100);
+
+    const deviation =
+        bone - info.target;
+
+    const color =
+        Math.abs(deviation) <= info.tolerance
+        ? "green"
+        : "red";
+
+    document.getElementById("result").innerHTML = `
+        <div><b>${selectedProduct || "-"}</b></div>
+        <div>Machine Dryness: ${machineDryness.toFixed(2)} %</div>
+        <div>Moisture Content: ${moistureContent.toFixed(2)} %</div>
+        <div>Wet: ${wet} g</div>
+        <div>Wet should be: ${wetShouldBe.toFixed(1)} g</div>
+        <div>Dry: ${dry} g</div>
+        <div>Bone Dry: ${bone} g</div>
+        <div>Bone Dry Target: ${info.target} ± ${info.tolerance} g</div>
+        <div class="${color}">
+            Deviation: ${deviation.toFixed(1)} g
+        </div>
+        <div>Speed: ${speed} KO</div>
+        <div>Dryer: ${dryerTemp} °C</div>
+    `;
+}
+</script>
+
+</body>
+</html>
