@@ -295,9 +295,20 @@ catch(e){
 
 function calculate() {
 
-    const wet = parseFloat(document.getElementById("wetWeight").value) || 0;
-    const dry = parseFloat(document.getElementById("dryWeight").value) || 0;
-    const bone = parseFloat(document.getElementById("boneDry").value) || 0;
+    const wet =
+    parseFloat(
+        document.getElementById("wetWeight").value.replace(",", ".")
+    ) || 0;
+
+const dry =
+    parseFloat(
+        document.getElementById("dryWeight").value.replace(",", ".")
+    ) || 0;
+
+const bone =
+    parseFloat(
+        document.getElementById("boneDry").value.replace(",", ".")
+    ) || 0;
 
     const dryerTemp = document.getElementById("dryerTemp").value;
     const speed = document.getElementById("speed").value;
