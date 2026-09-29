@@ -336,10 +336,10 @@ const bone =
         <div><b>${selectedProduct || "-"}</b></div>
         <div>Machine Dryness: ${machineDryness.toFixed(2)} %</div>
         <div>Moisture Content: ${moistureContent.toFixed(2)} %</div>
-        <div>Wet: ${wet} g</div>
+        <div>Wet: ${wet.toFixed(1)} g</div>
         <div>Wet should be: ${wetShouldBe.toFixed(1)} g</div>
-        <div>Dry: ${dry} g</div>
-        <div>Bone Dry: ${bone} g</div>
+        <div>Dry: ${dry.toFixed(1)} g</div>
+        <div>Bone Dry: ${bone.toFixed(1)} g</div>
         <div>Bone Dry Target: ${info.target} ± ${info.tolerance} g</div>
         <div class="${color}">
             Deviation: ${deviation.toFixed(1)} g
