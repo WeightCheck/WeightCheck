@@ -283,7 +283,15 @@ document.getElementById("search")
     renderProducts(e.target.value);
 });
 
-renderProducts();
+try {
+    renderProducts();
+    document.getElementById("debug").innerHTML =
+        "Products loaded";
+}
+catch(e){
+    document.getElementById("debug").innerHTML =
+        e.message;
+}
 
 function calculate() {
 
